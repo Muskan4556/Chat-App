@@ -4,6 +4,8 @@ import "dotenv/config";
 import mongoose from "mongoose";
 import cookieParser from "cookie-parser";
 
+import authRoute from "./routes/auth";
+
 const app = express();
 
 // db
@@ -33,3 +35,6 @@ app.get("/health", (req: Request, res: Response) => {
     message: "Helath OK",
   });
 });
+
+app.use("/api/v1/auth", authRoute);
+
