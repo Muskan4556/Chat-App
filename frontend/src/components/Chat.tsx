@@ -251,7 +251,8 @@ const Chat = () => {
               <Plus className="h-5 w-5" />
             </Button>
             <Input
-              className="flex-grow border-none shadow-none focus:ring-0 focus:outline-none"
+              className="flex-grow border-none shadow-none focus-visible:ring-0 focus:outline-none focus:border-transparent input"
+            
               placeholder="Enter a message..."
               onChange={(e) => setMessageText(e.target.value)}
               value={messageText}
