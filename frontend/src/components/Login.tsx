@@ -44,7 +44,7 @@ const formSchema = z.object({
     ),
 });
 
-export type LoginData = z.infer<typeof formSchema>;
+export type TLogin = z.infer<typeof formSchema>;
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -52,7 +52,7 @@ const Login = () => {
   const navigate = useNavigate();
   const { validateToken } = useAppContext();
 
-  const form = useForm<LoginData>({
+  const form = useForm<TLogin>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
@@ -60,7 +60,7 @@ const Login = () => {
     },
   });
 
-  const onSubmit = async (data: LoginData) => {
+  const onSubmit = async (data: TLogin) => {
     try {
       await login(data);
       if (!error) {
@@ -161,7 +161,7 @@ const Login = () => {
               Don't have an account?{" "}
               <Link
                 to="/auth/signup"
-                className="text-[#0066FF] hover:underline"
+                className="text-green-500 hover:underline"
               >
                 Sign up
               </Link>

@@ -1,8 +1,10 @@
 import { Navigate, Route, Routes } from "react-router-dom";
-import App from "./App";
 import { useAppContext } from "./context/useAppContext";
 import Layout from "./layout/Layout";
 import AuthPage from "./pages/AuthPage";
+import UserSectionPage from "./pages/UserSectionPage";
+import UserProfilePage from "./pages/UserProfilePage";
+import Chat from "./components/Chat";
 
 const AppRouter = () => {
   const { isLoggedIn, loading } = useAppContext();
@@ -18,10 +20,36 @@ const AppRouter = () => {
         element={
           isLoggedIn ? (
             <Layout>
-              <App />
+              <UserSectionPage />
             </Layout>
           ) : (
             <Navigate to="/auth/login" />
+          )
+        }
+      />
+      {isLoggedIn && (
+        <Route
+          path="/chat/:userId"
+          element={
+            isLoggedIn && (
+              <Layout>
+                <div className="flex gap-4 relative">
+                 <div className="hidden md:block"> <UserSectionPage /></div>
+                  <Chat />
+                </div>
+              </Layout>
+            )
+          }
+        />
+      )}
+
+      <Route
+        path="/profile"
+        element={
+          isLoggedIn && (
+            <Layout>
+              <UserProfilePage />
+            </Layout>
           )
         }
       />

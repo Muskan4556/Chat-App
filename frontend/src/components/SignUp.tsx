@@ -18,6 +18,7 @@ import { motion } from "framer-motion";
 import { useCreateNewUser } from "@/api/auth";
 import LoadingButton from "./LoadingButton";
 import { useAppContext } from "@/context/useAppContext";
+import { toast } from "sonner";
 
 const formSchema = z.object({
   email: z.string().email(),
@@ -46,15 +47,20 @@ const formSchema = z.object({
           "Password must be strong (min 8 characters, 1 lowercase, 1 uppercase, 1 number, and 1 symbol)",
       }
     ),
+  avatarUrl: z.string().url(),
 });
 
 export type TSignup = z.infer<typeof formSchema>;
 
 const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const { registerUser, error, status } = useCreateNewUser();
   const navigate = useNavigate();
   const { validateToken } = useAppContext();
+
+  console.log("Cloud Name:", import.meta.env.VITE_CLOUDINARY_CLOUD_NAME);
+  console.log("Upload Preset:", import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESETS);
 
   const form = useForm<TSignup>({
     resolver: zodResolver(formSchema),
@@ -68,7 +74,8 @@ const Signup = () => {
 
   const onSubmit = async (data: TSignup) => {
     try {
-      await registerUser(data);
+      const userData = { ...data, avatarUrl: form.getValues("avatarUrl") };
+      await registerUser(userData);
       if (!error) {
         await validateToken();
         navigate("/");
@@ -78,6 +85,45 @@ const Signup = () => {
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleAvatarUpload = (result: any) => {
+    if (result?.event === "success") {
+      setAvatarUrl(result?.info?.secure_url);
+      form.setValue("avatarUrl", result?.info?.secure_url);
+    }
+  };
+
+  const handleUploadClick = () => {
+    const widget = window.cloudinary.createUploadWidget(
+      {
+        cloudName: import.meta.env.VITE_CLOUDINARY_CLOUD_NAME,
+        uploadPreset: import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESETS,
+        sources: ["local", "url", "camera"],
+        cropping: true,
+        multiple: false,
+        clientAllowedFormats: ["jpg", "png", "jpeg"],
+        theme: "minimal",
+        maxFileSize: 10000000, // 10MB size limit
+        folder: "chat-app",
+        accessMode: "private",
+      },
+      // @ts-expect-error: Expect an error on the next line
+      (error, result) => {
+        if (result && result.event === "success") {
+          handleAvatarUpload(result);
+        } else if (error) {
+          console.error("Upload Widget Error:", error);
+        } else if (
+          result?.event === "error" &&
+          result?.info?.error?.code === "FILE_TOO_LARGE"
+        ) {
+          toast.error("File is too large. Please upload a smaller file.");
+        }
+      }
+    );
+
+    widget.open();
+  };
   return (
     <Form {...form}>
       <form
@@ -91,7 +137,7 @@ const Signup = () => {
           transition={{ duration: 0.5 }}
         >
           <div className="text-center">
-            <h1 className="text-2xl md:text-3xl font-bold text-[#0066FF] mb-4">
+            <h1 className="text-2xl md:text-3xl font-bold text-green-500 mb-4">
               WebChat
             </h1>
             <h2 className="text-xl md:text-2xl font-semibold text-gray-900 mb-6">
@@ -186,6 +232,42 @@ const Signup = () => {
                 </FormItem>
               )}
             />
+
+            <FormField
+              control={form.control}
+              name="avatarUrl"
+              render={() => (
+                <FormItem>
+                  <FormLabel>Profile Picture</FormLabel>
+                  <FormControl>
+                    <div className="flex items-center space-x-4">
+                      {avatarUrl ? (
+                        <img
+                          src={avatarUrl}
+                          alt="Avatar Preview"
+                          className="w-16 h-16 rounded-full border object-cover"
+                        />
+                      ) : (
+                        <div className="w-16 h-16 rounded-full border bg-gray-200 flex items-center justify-center">
+                          <span className="text-xs text-gray-500">
+                            No Image
+                          </span>
+                        </div>
+                      )}
+
+                      <Button
+                        type="button"
+                        onClick={handleUploadClick}
+                        className="py-2 px-4 bg-green-500 text-white rounded-md hover:bg-green-600"
+                      >
+                        Upload
+                      </Button>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
 
           {status === "pending" ? (
@@ -193,7 +275,7 @@ const Signup = () => {
           ) : (
             <Button
               type="submit"
-              className="mt-4 w-full py-2 bg-[#0066FF] text-white font-semibold rounded-md hover:bg-green-600 transition duration-300"
+              className="mt-4 w-full py-2 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition duration-300"
             >
               Sign Up
             </Button>
@@ -202,7 +284,7 @@ const Signup = () => {
           <div className="text-center mt-4">
             <p className="text-sm text-gray-600">
               Already have an account?{" "}
-              <Link to="/auth/login" className="text-[#0066FF] hover:underline">
+              <Link to="/auth/login" className="text-green-500 hover:underline">
                 Log in
               </Link>
             </p>

@@ -65,3 +65,29 @@
   }
 }
 
+.scroll-thin {
+  overflow: hidden;
+}
+
+.scroll-thin:hover {
+  overflow: auto;
+}
+
+.scroll-thin::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.scroll-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scroll-thin::-webkit-scrollbar-thumb {
+  background-color: #a6f0a9;
+  border-radius: 10px;
+  border: 2px solid transparent;
+}
+
+.scroll-thin::-webkit-scrollbar-thumb:hover {
+  background-color: #a6f0a9;
+}

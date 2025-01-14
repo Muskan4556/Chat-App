@@ -7,7 +7,7 @@ export type AppContextType = {
   validateToken: () => Promise<void>;
   status: "idle" | "pending" | "error" | "success";
   error: Error | null;
-  userRole: string | null;
+  userId: string | null;
   loading: boolean;
 };
 
@@ -21,8 +21,8 @@ export const AppContextProvider = ({ children }: ContextProviderProps) => {
   const { validateToken: validateTokenApi } = useValidateToken();
 
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
-  const [userRole, setUserRole] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(true); 
+  const [userId, setUserId] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
   const {
     mutateAsync: validateToken,
@@ -33,43 +33,43 @@ export const AppContextProvider = ({ children }: ContextProviderProps) => {
     mutationFn: validateTokenApi,
     onSuccess: (data) => {
       setIsLoggedIn(true);
-      setUserRole(data.userRole);
+      setUserId(data.userId);
       localStorage.setItem("isLoggedIn", "true");
-      localStorage.setItem("userRole", data.userRole);
-      setLoading(false); 
+      localStorage.setItem("userId", data.userId);
+      setLoading(false);
     },
     onError: () => {
       setIsLoggedIn(false);
-      setUserRole(null);
+      setUserId(null);
       localStorage.removeItem("isLoggedIn");
-      localStorage.removeItem("userRole");
-      setLoading(false); 
+      localStorage.removeItem("userId");
+      setLoading(false);
       reset();
     },
   });
 
   useEffect(() => {
     const storedLoginStatus = localStorage.getItem("isLoggedIn");
-    const storedUserRole = localStorage.getItem("userRole");
+    const storedUserId = localStorage.getItem("userId");
 
     if (storedLoginStatus === "true") {
       setIsLoggedIn(true);
-      setUserRole(storedUserRole);
+      setUserId(storedUserId);
       validateToken().catch(() => {});
     } else {
-      setLoading(false); 
+      setLoading(false);
     }
   }, [validateToken]);
 
   return (
     <AppContext.Provider
       value={{
-        userRole,
+        userId,
         isLoggedIn,
         validateToken,
         status,
         error,
-        loading, 
+        loading,
       }}
     >
       {children}
