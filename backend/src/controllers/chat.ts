@@ -4,7 +4,6 @@ import Chat from "../models/chat";
 export const createChat = async (req: Request, res: Response): Promise<any> => {
   try {
     const { userId } = req.body;
-    console.log(userId);
 
     if (!userId) {
       return res.status(400).json({ message: "UserId is required" });

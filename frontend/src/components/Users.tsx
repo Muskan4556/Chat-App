@@ -31,8 +31,6 @@ const Users = ({ users, search, onSearchChange, onSearchSubmit }: Props) => {
     return chat;
   });
 
-  console.log(filteredChatData);
-
   return (
     <div className="p-6 space-y-6 w-full sm:w-[400px] bg-gray-50 rounded-md shadow-md">
       <form

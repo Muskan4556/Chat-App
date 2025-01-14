@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useCreateChat, useGetChat } from "@/api/chat";
 import { useAppContext } from "@/context/useAppContext";
@@ -10,6 +10,7 @@ import { Plus, Send } from "lucide-react";
 import { Button } from "./ui/button";
 import { toast } from "sonner";
 import { ScrollArea } from "./ui/scroll-area";
+import io from "socket.io-client";
 
 const Chat = () => {
   const location = useLocation();
@@ -17,9 +18,10 @@ const Chat = () => {
   const [currentUserId, setCurrentUserId] = useState(
     location.pathname.split("/")[2]
   );
-
   const [messageText, setMessageText] = useState("");
-  // const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [, setSocketConnected] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const socketRef = useRef<any>(null);
 
   const { createChat } = useCreateChat();
   const {
@@ -60,6 +62,12 @@ const Chat = () => {
         chatId: chat._id as string,
         content: messageText,
       });
+      // Emit the message via socket to the backend
+      socketRef.current.emit("send message", {
+        chatId: chat._id as string,
+        content: messageText,
+        senderId: userId,
+      });
       setMessageText("");
       messageRefetch();
     }
@@ -69,7 +77,7 @@ const Chat = () => {
   const handleUpload = async (result: any) => {
     if (result?.event === "success") {
       const fileUrl = result?.info?.secure_url;
-      const fileType = result?.info?.resource_type; 
+      const fileType = result?.info?.resource_type;
 
       // setAvatarUrl(fileUrl);
 
@@ -78,6 +86,11 @@ const Chat = () => {
           chatId: chat._id as string,
           content: fileUrl,
           type: fileType,
+        });
+        socketRef.current.emit("send message", {
+          chatId: chat._id as string,
+          content: fileUrl,
+          senderId: userId,
         });
         messageRefetch();
       }
@@ -123,6 +136,39 @@ const Chat = () => {
 
     widget.open();
   };
+
+  // Socket
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+  useEffect(() => {
+    socketRef.current = io(API_BASE_URL, {
+      withCredentials: true,
+    });
+
+    socketRef.current.emit("setup", userId);
+    socketRef.current.on("connection", () => setSocketConnected(true));
+
+    // Join chat room based on chat ID
+    if (chat) {
+      socketRef.current.emit("join chat", chat._id);
+    }
+
+    // Listen for message received event and update messages in real-time
+    socketRef.current.on(
+      "message received",
+      (newMessage: { chatId: string | undefined }) => {
+        if (chat && chat._id === newMessage.chatId) {
+          messageRefetch();
+        }
+      }
+    );
+
+    return () => {
+      socketRef.current.off("connected");
+      socketRef.current.off("message received");
+      socketRef.current.disconnect();
+    };
+  }, [userId, chat, API_BASE_URL, messageRefetch]);
 
   if (chatLoading) {
     return <Loader />;

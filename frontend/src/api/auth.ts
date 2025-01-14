@@ -7,8 +7,6 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export const useCreateNewUser = () => {
   const createNewUser = async (formData: TSignup) => {
-    console.log(formData.phoneNo);
-    
     const response = await fetch(`${API_BASE_URL}/api/v1/auth/signup`, {
       method: "POST",
       credentials: "include",
