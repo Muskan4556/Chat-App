@@ -7,6 +7,7 @@ import cookieParser from "cookie-parser";
 import authRoute from "./routes/auth";
 import userRoute from "./routes/user";
 import chatRoute from "./routes/chat";
+import messageRoute from "./routes/message";
 
 const app = express();
 
@@ -41,3 +42,4 @@ app.get("/health", (req: Request, res: Response) => {
 app.use("/api/v1/auth", authRoute);
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/chat", chatRoute);
+app.use("/api/v1/message", messageRoute);

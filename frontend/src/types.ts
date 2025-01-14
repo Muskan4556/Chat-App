@@ -8,12 +8,12 @@ export type TUser = {
 };
 
 export type TMessage = {
-  _id: string;
+  _id?: string;
   senderId?: TUser;
   content?: string;
-  chatId?: TChat;
-  type?: "text" | "image" | "document" | "video";
-  fileUrl?: string;
+  chatId?: string | TChat;
+  type?: string
+  createdAt?: string;
 };
 
 export type TChat = {

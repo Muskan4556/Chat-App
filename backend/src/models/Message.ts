@@ -7,24 +7,22 @@ const messageSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    chatId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Chat",
+      required: true,
+    },
     content: {
       type: String,
       trim: true,
       required: true,
     },
-    chatId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Chat",
-    },
+
     type: {
-      type: {
-        type: String,
-        enum: ["text", "image", "document", "video"],
-        required: true,
-        default: "text",
-      },
+      type: String,
+      required: true,
+      default: "text",
     },
-    fileUrl: { type: String },
   },
   { timestamps: true }
 );

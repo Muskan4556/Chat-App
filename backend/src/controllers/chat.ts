@@ -42,7 +42,7 @@ export const getSpecificChats = async (
   try {
     const userId = req.params.id;
 
-    if(!userId){
+    if (!userId) {
       return res.status(400).json({ message: "UserId is required" });
     }
 
@@ -50,6 +50,10 @@ export const getSpecificChats = async (
       users: { $all: [req.userId, userId] },
     })
       .populate("users", "-password")
+      .populate({
+        path: "latestMessage",
+        match: { _id: { $ne: null } },
+      });
     return res.status(200).json(chat);
   } catch (err) {
     console.log(err);
@@ -66,6 +70,10 @@ export const getAllChats = async (
   try {
     const chat = await Chat.find({})
       .populate("users", "-password")
+      .populate({
+        path: "latestMessage",
+        match: { _id: { $ne: null } },
+      })
       .sort({ updatedAt: -1 });
     return res.status(200).json(chat);
   } catch (err) {

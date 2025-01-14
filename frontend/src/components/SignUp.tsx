@@ -58,10 +58,6 @@ const Signup = () => {
   const { registerUser, error, status } = useCreateNewUser();
   const navigate = useNavigate();
   const { validateToken } = useAppContext();
-
-  console.log("Cloud Name:", import.meta.env.VITE_CLOUDINARY_CLOUD_NAME);
-  console.log("Upload Preset:", import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESETS);
-
   const form = useForm<TSignup>({
     resolver: zodResolver(formSchema),
     defaultValues: {

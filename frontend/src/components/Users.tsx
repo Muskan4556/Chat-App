@@ -56,18 +56,15 @@ const Users = ({ users, search, onSearchChange, onSearchSubmit }: Props) => {
       </form>
       <div className="max-h-[500px] space-y-4 scroll-thin">
         {users.map((user) => {
-          // Find the chat for this user
           const chat = filteredChatData?.find((chat) =>
             chat.users?.some((u) => u._id === user._id)
           );
-
-          // Get the latest message from the chat
           const latestMessage = chat?.latestMessage;
           return (
             <Link to={`/chat/${user._id as string}`}>
               <div
                 key={user._id}
-                className="flex items-center gap-4 bg-white p-4 rounded-lg shadow-sm hover:shadow-xl transition duration-300 ease-in-out cursor-pointer hover:bg-green-50"
+                className="flex items-center gap-4 bg-white p-4 rounded-lg shadow-sm hover:shadow-xl transition duration-300 ease-in-out cursor-pointer hover:bg-green-50 my-4"
               >
                 <Avatar className="w-14 h-14 border-2 border-green-400 shadow-md">
                   <AvatarImage src={user?.avatarUrl} />

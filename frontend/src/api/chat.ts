@@ -78,7 +78,7 @@ export const useGetChat = (userId: string) => {
 
 export const useGetAllChat = () => {
   const fetchAllChats = async (): Promise<TChat[]> => {
-    const response = await fetch(`${API_BASE_URL}/api/v1/chat/`, {
+    const response = await fetch(`${API_BASE_URL}/api/v1/chat`, {
       method: "GET",
       credentials: "include",
       headers: {
