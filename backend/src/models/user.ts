@@ -6,6 +6,11 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true, lowercase: true },
   password: { type: String, required: true },
   phoneNo: { type: String },
+  avatarUrl: {
+    type: String,
+    default:
+      "https://cdn-icons-png.flaticon.com/128/4140/4140060.png",
+  },
 });
 
 export type TUser = Omit<

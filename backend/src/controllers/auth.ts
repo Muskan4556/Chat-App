@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 
 export const signup = async (req: Request, res: Response): Promise<any> => {
   try {
-    const { name, email, password, phoneNo } = req.body;
+    const { name, email, password, phoneNo, avatarUrl } = req.body;
     if (phoneNo && phoneNo === null) {
       return res.status(400).json({ message: "Phone number cannot be null" });
     }
@@ -17,7 +17,7 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
       return res.status(409).json({ message: "User already exists" });
     }
 
-    user = new User({ name, email, password, phoneNo });
+    user = new User({ name, email, password, phoneNo, avatarUrl });
 
     await user.save();
 
