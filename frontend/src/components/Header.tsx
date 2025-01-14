@@ -17,20 +17,26 @@ const Header = () => {
   const { isLoggedIn, validateToken, userId } = useAppContext();
   const { logoutUser } = useLogout();
   const navigate = useNavigate();
-  const { user } = useGetUser(userId as string);
+  const { user, isLoading } = useGetUser(userId as string);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    if (userId === user?._id) {
-      setAvatarUrl(user?.avatarUrl as string);
+    if (!isLoading) {
+      if (userId === user?._id) {
+        setAvatarUrl(user?.avatarUrl as string);
+      }
     }
-  }, [user, userId]);
+  }, [user, userId, avatarUrl, isLoading]);
 
   const handleLogout = async () => {
     await logoutUser();
     navigate("/auth/login");
     await validateToken();
   };
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <header className="bg-green-600 text-white pl-6 pr-8 py-6 shadow-md">
@@ -50,16 +56,14 @@ const Header = () => {
                   whileTap={{ scale: 0.95 }}
                   transition={{ duration: 0.3 }}
                 >
-                  {avatarUrl && (
-                    <Avatar className="relative">
-                      <AvatarImage
-                        src={avatarUrl}
-                        alt="User Avatar"
-                        className="rounded-full"
-                      />
-                      <AvatarFallback>CN</AvatarFallback>
-                    </Avatar>
-                  )}
+                  <Avatar className="relative">
+                    <AvatarImage
+                      src={avatarUrl as string}
+                      alt="User Avatar"
+                      className="rounded-full"
+                    />
+                    <AvatarFallback>CN</AvatarFallback>
+                  </Avatar>
                 </motion.div>
               </Link>
               <div

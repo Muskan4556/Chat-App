@@ -3,7 +3,6 @@ import { useLocation } from "react-router-dom";
 import { useCreateChat, useGetChat } from "@/api/chat";
 import { useAppContext } from "@/context/useAppContext";
 import { useGetAllMessages, useSendMessage } from "@/api/message";
-import Loader from "./Loader";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Input } from "./ui/input";
 import { Plus, Send } from "lucide-react";
@@ -171,7 +170,9 @@ const Chat = () => {
   }, [userId, chat, API_BASE_URL, messageRefetch]);
 
   if (chatLoading) {
-    return <Loader />;
+    return (
+      <>Loading...</>
+    );
   }
 
   const currentUserChat = chat?.users?.find((user) => user._id !== userId);

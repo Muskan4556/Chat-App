@@ -52,7 +52,7 @@ const Users = ({ users, search, onSearchChange, onSearchSubmit }: Props) => {
           Search
         </Button>
       </form>
-      <div className="max-h-[500px] space-y-4 scroll-thin overflow-x-hidden">
+      <div className="md:max-h-[500px] max-h-auto space-y-4 scroll-thin overflow-auto">
         {users.map((user) => {
           const chat = filteredChatData?.find((chat) =>
             chat.users?.some((u) => u._id === user._id)
