@@ -5,7 +5,7 @@ import { useAppContext } from "@/context/useAppContext";
 import { useGetAllMessages, useSendMessage } from "@/api/message";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Input } from "./ui/input";
-import { Plus, Send } from "lucide-react";
+import { MessageCircle, Plus, Send } from "lucide-react";
 import { Button } from "./ui/button";
 import { toast } from "sonner";
 import { ScrollArea } from "./ui/scroll-area";
@@ -75,16 +75,31 @@ const Chat = () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleUpload = async (result: any) => {
     if (result?.event === "success") {
-      const fileUrl = result?.info?.secure_url;
-      const fileType = result?.info?.resource_type;
+      let fileUrl = result?.info?.secure_url;
+      const fileType = result?.info?.format;
 
-      // setAvatarUrl(fileUrl);
+      let contentType = fileType;
+
+      if (fileType === "mp4" || fileType === "mkv") {
+        contentType = "video";
+      } else if (fileType === "pdf") {
+        const transformedUrl = fileUrl.replace(".pdf", ".jpg");
+        contentType = "pdf";
+        fileUrl = transformedUrl;
+      } else if (
+        fileType === "jpg" ||
+        fileType === "jpeg" ||
+        fileType === "png" ||
+        fileType === "gif"
+      ) {
+        contentType = "image";
+      }
 
       if (chat) {
         await sendMessage({
           chatId: chat._id as string,
           content: fileUrl,
-          type: fileType,
+          type: contentType,
         });
         socketRef.current.emit("send message", {
           chatId: chat._id as string,
@@ -171,100 +186,170 @@ const Chat = () => {
 
   if (chatLoading) {
     return (
-      <>Loading...</>
+      <div className="flex-1 flex items-center justify-center">
+        <div className="animate-pulse text-gray-500">
+          Loading conversation...
+        </div>
+      </div>
     );
   }
 
   const currentUserChat = chat?.users?.find((user) => user._id !== userId);
 
   return (
-    <div className="py-6 px-4 space-y-6 w-full bg-gray-50 rounded-lg shadow-lg">
-      {currentUserChat && (
-        <div className="relative">
-          <header className="text-xl font-semibold flex items-center gap-2 mb-4">
-            <Avatar className="relative">
-              <AvatarImage
-                src={currentUserChat.avatarUrl}
-                alt="User Avatar"
-                className="rounded-full"
-              />
-              <AvatarFallback>CN</AvatarFallback>
-            </Avatar>
-            {currentUserChat.name}
+    <div className="flex-1 flex flex-col h-screen  p-4 bg-gray-100 rounded-lg ">
+      {currentUserChat ? (
+        <>
+          <header className="px-4 sm:px-6 py-4 bg-white border-b border-gray-200 shadow-sm rounded-lg rounded-b-none  ">
+            <div className="max-w-full sm:max-w-3xl px-2 flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="relative">
+                  <Avatar className="h-10 w-10 sm:h-12 sm:w-12 ring-4 ring-green-100">
+                    <AvatarImage
+                      src={currentUserChat.avatarUrl}
+                      className="object-cover"
+                    />
+                    <AvatarFallback className="bg-green-100 text-green-700 text-lg font-semibold">
+                      {currentUserChat.name?.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full bg-green-500 ring-2 ring-white" />
+                </div>
+                <div>
+                  <h2 className="text-base sm:text-lg font-semibold text-gray-900">
+                    {currentUserChat.name}
+                  </h2>
+                  <p className="text-xs sm:text-sm font-medium text-green-600">
+                    Active now
+                  </p>
+                </div>
+              </div>
+            </div>
           </header>
 
-          <ScrollArea className="flex flex-col bg-white overflow-y-auto rounded-lg p-4 h-96 shadow-md">
-            {message?.map((m) => (
-              <div
-                key={m._id}
-                className={`flex flex-col mb-4 ${
-                  m.senderId?._id === userId ? "items-end" : "items-start"
-                }`}
-              >
+          <ScrollArea className="flex-1 px-4 py-6 bg-white">
+            <div className="space-y-6 max-w-full sm:max-w-3xl mx-auto">
+              {message?.map((m) => (
                 <div
-                  className={`${
-                    m.type === "text"
-                      ? `px-4 py-2 rounded-lg shadow ${
-                          m.senderId?._id === userId
-                            ? "bg-green-500 text-white"
-                            : "bg-gray-200 text-black"
-                        }`
-                      : ""
+                  key={m._id}
+                  className={`flex ${
+                    m.senderId?._id === userId ? "justify-end" : "justify-start"
                   }`}
                 >
-                  {m?.type === "text" && <p>{m.content}</p>}
-
-                  {m?.type === "image" && (
-                    <img
-                      src={m.content}
-                      alt="Sent image"
-                      className="max-w-sm max-h-52 rounded-lg"
-                    />
-                  )}
-
-                  {m?.type === "video" && (
-                    <video
-                      src={m.content}
-                      controls
-                      className="max-w-xs max-h-40 rounded-lg"
-                    />
-                  )}
+                  <div className="flex flex-col max-w-full md:max-w-[70%] space-y-1">
+                    <div
+                      className={`flex items-end gap-2 ${
+                        m.senderId?._id === userId
+                          ? "flex-row-reverse"
+                          : "flex-row"
+                      }`}
+                    >
+                      {m.senderId?._id !== userId && (
+                        <Avatar className="h-8 w-8 ring-2 ring-green-50">
+                          <AvatarImage src={currentUserChat.avatarUrl} />
+                          <AvatarFallback className="bg-green-100 text-green-700">
+                            {currentUserChat.name?.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                      )}
+                      <div
+                        className={`${
+                          m.type === "text"
+                            ? `px-4 py-2.5 rounded-2xl shadow-sm ${
+                                m.senderId?._id === userId
+                                  ? "bg-green-500 text-white rounded-br-sm"
+                                  : "bg-white text-gray-900 rounded-bl-sm"
+                              }`
+                            : ""
+                        }`}
+                      >
+                        {m?.type === "text" && (
+                          <p className="text-sm sm:text-base leading-relaxed">
+                            {m.content}
+                          </p>
+                        )}
+                        {(m?.type === "image" || m?.type === "pdf") && (
+                          <img
+                            src={m.content}
+                            alt="Sent image"
+                            className="rounded-lg max-w-full md:max-w-sm max-h-52 object-cover shadow-md"
+                          />
+                        )}
+                        {m?.type === "video" &&
+                          m.content &&
+                          (m.content.includes(".mp4") ||
+                            m.content.includes(".mkv")) && (
+                            <div className="w-full max-w-sm">
+                              <video controls>
+                                <source src={m.content} type="video/mp4" />
+                                Your browser does not support the video tag.
+                              </video>
+                            </div>
+                          )}
+                      </div>
+                    </div>
+                    <span
+                      className={`text-xs text-gray-500 ${
+                        m.senderId?._id === userId ? "text-right" : "text-left"
+                      } px-2`}
+                    >
+                      {new Date(m.createdAt || "").toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </span>
+                  </div>
                 </div>
-                <span className="text-xs text-gray-500 mt-1">
-                  {new Date(m.createdAt || "").toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </span>
-              </div>
-            ))}
+              ))}
+            </div>
           </ScrollArea>
 
-          <form
-            onSubmit={handleSendMessage}
-            className="flex items-center gap-2 mt-4 p-2 bg-white rounded-lg shadow-md"
-          >
-            <Button
-              type="button"
-              onClick={handleUploadClick}
-              className="bg-green-500 hover:bg-green-600 text-white p-2 rounded-md"
+          <div className="md:p-4 bg-white rounded-lg rounded-t-none border-t border-gray-200">
+            <form
+              onSubmit={handleSendMessage}
+              className="flex items-center gap-3 bg-gray-50 rounded-2xl p-2 max-w-full sm:max-w-3xl mx-auto shadow-sm"
             >
-              <Plus className="h-5 w-5" />
-            </Button>
-            <Input
-              className="flex-grow border-none shadow-none focus-visible:ring-0 focus:outline-none focus:border-transparent input"
-            
-              placeholder="Enter a message..."
-              onChange={(e) => setMessageText(e.target.value)}
-              value={messageText}
-            />
-            <Button
-              type="submit"
-              className="bg-green-500 hover:bg-green-600 text-white"
-            >
-              <Send className="h-5 w-5" />
-            </Button>
-          </form>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  onClick={handleUploadClick}
+                  variant="ghost"
+                  size="icon"
+                  className="text-gray-500 hover:text-green-600 hover:bg-green-50 rounded-full transition-colors"
+                >
+                  <Plus className="h-5 w-5" />
+                </Button>
+              </div>
+
+              <Input
+                className="flex-1 border-none bg-transparent focus-visible:ring-0 focus:shadow-none shadow-none text-gray-700 placeholder:text-gray-400 text-sm focus:outline-none focus:border-none md:placeholder:tracking-normal placeholder:tracking-tighter"
+                placeholder="Type your message..."
+                value={messageText}
+                onChange={(e) => setMessageText(e.target.value)}
+              />
+
+              <div className="flex gap-2">
+                <Button
+                  type="submit"
+                  className="bg-green-500 hover:bg-green-600 text-white px-5 py-2 rounded-full transition-colors flex items-center gap-2 w-4"
+                >
+                  <Send className="h-5 w-5" />
+                </Button>
+              </div>
+            </form>
+          </div>
+        </>
+      ) : (
+        <div className="flex-1 flex flex-col items-center justify-center text-center px-4 sm:p-6 bg-white">
+          <div className="bg-green-50 p-6 rounded-full mb-6">
+            <MessageCircle className="h-16 w-16 text-green-500" />
+          </div>
+          <h3 className="text-lg sm:text-2xl font-semibold text-gray-900 mb-3">
+            No Conversation Selected
+          </h3>
+          <p className="text-sm sm:text-base text-gray-600 max-w-sm">
+            Choose a conversation from the sidebar to start messaging
+          </p>
         </div>
       )}
     </div>

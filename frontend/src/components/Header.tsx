@@ -34,9 +34,6 @@ const Header = () => {
     await validateToken();
   };
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
 
   return (
     <header className="bg-green-600 text-white pl-6 pr-8 py-6 shadow-md">

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useGetAllUsers } from "@/api/user";
 import Users from "@/components/Users";
+import { MessageCircle } from "lucide-react";
 
 const UserSectionPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -17,13 +18,17 @@ const UserSectionPage = () => {
     setSearchParams({ search });
   };
 
-
   if (users?.length === 0) {
-    return <p className="p-4">No users found</p>;
+    return (
+      <div className="flex flex-col items-center justify-center h-64 bg-gray-50 rounded-lg  shadow-md">
+        <MessageCircle className="w-12 h-12 text-gray-400 mb-4" />
+        <p className="text-gray-600 text-lg">No users found</p>
+      </div>
+    );
   }
 
   return (
-    <div className="flex gap-4 relative ">
+    <div className="flex justify-center relative p-4 bg-gray-100 rounded-lg min-h-screen w-96">
       <Users
         users={users || []}
         refetch={refetch}

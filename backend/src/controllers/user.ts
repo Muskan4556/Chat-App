@@ -15,7 +15,7 @@ export const getAllUser = async (req: Request, res: Response): Promise<any> => {
     const users = await User.find({
       _id: { $ne: req.userId },
       ...query,
-    }).select("_id name email phoneNo avatarUrl");
+    }).select("_id name email phoneNo avatarUrl").sort({ updatedAt: 1 });;
 
     if (!users || users.length === 0) {
       return res.status(404).json({
@@ -43,7 +43,7 @@ export const getUserById = async (
     }
     const user = await User.findById(id).select(
       "_id name email phoneNo avatarUrl"
-    );
+    )
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }

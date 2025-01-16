@@ -29,10 +29,8 @@ export const signup = async (req: Request, res: Response): Promise<any> => {
 
     res.cookie("auth_token", token, {
       httpOnly: true,
-      // secure: process.env.NODE_ENV === "production",
-      secure: true,
-      // sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      sameSite: "none",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge: 24 * 60 * 60 * 1000,
     });
 
@@ -67,12 +65,12 @@ export const login = async (req: Request, res: Response): Promise<any> => {
 
     res.cookie("auth_token", token, {
       httpOnly: true,
-      // secure: process.env.NODE_ENV === "production",
-      secure: true,
-      sameSite: "none",
-      // sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       maxAge: 24 * 60 * 60 * 1000,
     });
+
+    console.log(process.env.NODE_ENV);
 
     return res.status(200).json({
       message: "Logged in successfully",

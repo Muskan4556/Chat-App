@@ -12,7 +12,7 @@ export type TMessage = {
   senderId?: TUser;
   content?: string;
   chatId?: string | TChat;
-  type?: string
+  type?: string;
   createdAt?: string;
 };
 
@@ -20,4 +20,5 @@ export type TChat = {
   _id?: string;
   users?: [TUser];
   latestMessage?: TMessage;
+  updatedAt: string;
 };
