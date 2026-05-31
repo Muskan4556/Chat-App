@@ -76,7 +76,7 @@ const Login = () => {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="flex justify-center items-center px-4 sm:px-6 md:px-8 mt-4"
+        className="flex justify-center items-center px-4 sm:px-6 md:px-8 w-full"
       >
         <motion.div
           className="max-w-md w-full p-8 space-y-6 bg-white shadow-lg border rounded-lg"

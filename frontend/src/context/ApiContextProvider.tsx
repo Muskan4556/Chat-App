@@ -1,5 +1,5 @@
 import React, { createContext, useEffect, useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useValidateToken } from "@/api/auth";
 
 export type AppContextType = {
@@ -9,6 +9,7 @@ export type AppContextType = {
   error: Error | null;
   userId: string | null;
   loading: boolean;
+  logout: () => void;
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -23,6 +24,8 @@ export const AppContextProvider = ({ children }: ContextProviderProps) => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+
+  const queryClient = useQueryClient();
 
   const {
     mutateAsync: validateToken,
@@ -44,9 +47,19 @@ export const AppContextProvider = ({ children }: ContextProviderProps) => {
       localStorage.removeItem("isLoggedIn");
       localStorage.removeItem("userId");
       setLoading(false);
+      queryClient.clear();
       reset();
     },
   });
+
+  const logout = () => {
+    setIsLoggedIn(false);
+    setUserId(null);
+    localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("userId");
+    queryClient.clear();
+    reset();
+  };
 
   useEffect(() => {
     const storedLoginStatus = localStorage.getItem("isLoggedIn");
@@ -70,6 +83,7 @@ export const AppContextProvider = ({ children }: ContextProviderProps) => {
         status,
         error,
         loading,
+        logout,
       }}
     >
       {children}

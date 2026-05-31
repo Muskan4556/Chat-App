@@ -1,5 +1,5 @@
 import { Eye, EyeOff } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef, ChangeEvent } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -56,6 +56,7 @@ const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const { registerUser, error, status } = useCreateNewUser();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const { validateToken } = useAppContext();
   const form = useForm<TSignup>({
@@ -81,50 +82,49 @@ const Signup = () => {
     }
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleAvatarUpload = (result: any) => {
-    if (result?.event === "success") {
-      setAvatarUrl(result?.info?.secure_url);
-      form.setValue("avatarUrl", result?.info?.secure_url);
+  const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 10000000) {
+      toast.error("File is too large (max 10MB)");
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("upload_preset", import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESETS);
+      formData.append("cloud_name", import.meta.env.VITE_CLOUDINARY_CLOUD_NAME);
+
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      const data = await response.json();
+      if (data.secure_url) {
+        setAvatarUrl(data.secure_url);
+        form.setValue("avatarUrl", data.secure_url);
+        toast.success("Avatar uploaded successfully");
+      }
+    } catch (err) {
+      console.error("Upload error:", err);
+      toast.error("Failed to upload avatar");
     }
   };
 
   const handleUploadClick = () => {
-    const widget = window.cloudinary.createUploadWidget(
-      {
-        cloudName: import.meta.env.VITE_CLOUDINARY_CLOUD_NAME,
-        uploadPreset: import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESETS,
-        sources: ["local", "url", "camera"],
-        cropping: true,
-        multiple: false,
-        clientAllowedFormats: ["jpg", "png", "jpeg"],
-        theme: "minimal",
-        maxFileSize: 10000000, // 10MB size limit
-        folder: "chat-app",
-        accessMode: "private",
-      },
-      // @ts-expect-error: Expect an error on the next line
-      (error, result) => {
-        if (result && result.event === "success") {
-          handleAvatarUpload(result);
-        } else if (error) {
-          console.error("Upload Widget Error:", error);
-        } else if (
-          result?.event === "error" &&
-          result?.info?.error?.code === "FILE_TOO_LARGE"
-        ) {
-          toast.error("File is too large. Please upload a smaller file.");
-        }
-      }
-    );
-
-    widget.open();
+    fileInputRef.current?.click();
   };
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="flex justify-center items-center px-4 sm:px-6 md:px-8 mt-4"
+        className="flex justify-center items-center px-4 sm:px-6 md:px-8 w-full"
       >
         <motion.div
           className="max-w-md w-full p-8 space-y-6 bg-white shadow-lg border rounded-lg"
@@ -251,6 +251,13 @@ const Signup = () => {
                         </div>
                       )}
 
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleFileUpload}
+                        className="hidden"
+                        accept="image/*"
+                      />
                       <Button
                         type="button"
                         onClick={handleUploadClick}

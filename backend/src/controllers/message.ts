@@ -29,6 +29,7 @@ export const sendMessage = async (
       { _id: chatId },
       {
         latestMessage: message,
+        updatedAt: new Date()
       }
     );
     return res.json({ message: "Message sent successfully" });

@@ -31,14 +31,14 @@ const AppRouter = () => {
         <Route
           path="/chat/:userId"
           element={
-            isLoggedIn && (
-              <Layout>
-                <div className="flex gap-4 relative">
-                 <div className="hidden md:block"> <UserSectionPage /></div>
-                  <Chat />
+            <Layout>
+              <div className="flex h-full overflow-hidden">
+                <div className="hidden md:block">
+                  <UserSectionPage isSidebar={true} />
                 </div>
-              </Layout>
-            )
+                <Chat />
+              </div>
+            </Layout>
           }
         />
       )}

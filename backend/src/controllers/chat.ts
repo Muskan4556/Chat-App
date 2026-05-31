@@ -67,7 +67,7 @@ export const getAllChats = async (
   res: Response
 ): Promise<any> => {
   try {
-    const chat = await Chat.find({})
+    const chat = await Chat.find({ users: req.userId })
       .populate("users", "-password")
       .populate({
         path: "latestMessage",

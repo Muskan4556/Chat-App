@@ -7,7 +7,7 @@ import { Toaster } from "sonner";
 import { AppContextProvider } from "./context/ApiContextProvider";
 import AppRouter from "./AppRouter";
 
-const queryClient = new QueryClient({
+export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false, 
