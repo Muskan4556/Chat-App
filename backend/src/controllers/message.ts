@@ -41,14 +41,16 @@ export const sendMessage = async (
   }
 };
 
+import mongoose from "mongoose";
+
 export const allMessages = async (
   req: Request,
   res: Response
 ): Promise<any> => {
   try {
     const chatId = req.params.id;
-    if (!chatId) {
-      return res.status(400).json({ message: "ChatId is required" });
+    if (!chatId || chatId === "undefined" || !mongoose.isValidObjectId(chatId)) {
+      return res.status(400).json({ message: "Valid ChatId is required" });
     }
 
     const messages = await Message.find({ chatId: chatId })

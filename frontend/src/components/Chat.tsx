@@ -59,6 +59,16 @@ const Chat = () => {
     createChatIfNeeded();
   }, [createChat, currentUserId, chat, chatRefetch, messageRefetch]);
 
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
   const handleSendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (messageText && chat) {
@@ -336,6 +346,7 @@ const Chat = () => {
                     </motion.div>
                   );
                 })}
+                <div ref={messagesEndRef} />
               </div>
             </ScrollArea>
 

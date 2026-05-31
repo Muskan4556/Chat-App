@@ -65,8 +65,9 @@ export const useGetChat = (userId: string) => {
     error,
     refetch,
   } = useQuery({
-    queryKey: ["chat"],
+    queryKey: ["chat", userId],
     queryFn: fetchChats,
+    enabled: !!userId && userId !== "undefined",
   });
 
   if (error) {

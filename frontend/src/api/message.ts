@@ -65,8 +65,9 @@ export const useGetAllMessages = (chatId: string) => {
     error,
     refetch,
   } = useQuery({
-    queryKey: ["message"],
+    queryKey: ["message", chatId],
     queryFn: fetchAllMessage,
+    enabled: !!chatId && chatId !== 'undefined',
   });
 
   if (error) {
